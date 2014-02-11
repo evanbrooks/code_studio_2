@@ -9,6 +9,9 @@
 
 html
   font: 500 36px/1.33 "Calibre", "Circular Std", sans-serif
+  font: 400 34px/1.33 "Nitti Grotesk Medium", "Circular Std", sans-serif
+  // font: 400 34px/1.33 "Nitti Grotesk", "Circular Std", sans-serif
+  text-rendering: optimizeLegibility
 
 .wrap
   padding: 0 10% 0 10%
@@ -18,13 +21,14 @@ html
 nav .wrap
   padding: 0 10% 0 10%
 
+$back: white
+$hilite: black
+$main: black
+
 a, a:visited
   color: inherit
   text-decoration: none
-  border-bottom: 1px dotted black
-
-$back: white
-$hilite: yellow
+  // border-bottom: 1px dotted $main
 
 body
   margin-top: 10em
@@ -32,43 +36,54 @@ body
   -webkit-transition: margin 0.3s, opacity 0.5s
   position: relative
   opacity: 0
+  color: $main
 
 .loaded
   opacity: 1
 
 nav
-  padding: 2em 0
+  padding: 1em 0
   position: fixed
   z-index: 999
   top: 0
-  left: 4%
-  right: 4%
+  left: 0
+  right: 0
   height: 350px
   .hide
-    visibility: hidden
+    color: transparent
     display: inline-block
+    border-bottom: 1px solid $main
 
   .pages
     text-align: justify
     li
       display: inline-block
       vertical-align: top
-      -webkit-transition: all 0.4s
-      height: 1em
+      -webkit-transition: all 0.2s
+      box-shadow: 0 0 0 1px rgba($hilite, 0)
+      // height: 1em
       a
         display: inline-block
-        height: 1em
+        // height: 1em
         -webkit-transition: all 0.4s
+      &:hover
+        border-bottom: 1px solid $main
     &:after
       content: ""
       width: 100%
       display: inline-block
+    // margin-bottom: -1.333em
 
-  .active
-    box-shadow: 0 0 0 5px $hilite
-    a
-      box-shadow: 0 0 0 5px $hilite
-      background: $hilite
+    .active
+      // box-shadow: 0 0 0 1px $hilite
+      border-bottom: 1px solid $main
+      a
+        // box-shadow: 0 0 0 1px $hilite
+        // background: $hilite
+
+.link, .link:visited
+  color: blue
+  border-bottom: 2px solid blue
 
 .abovetitles
   z-index: 999
@@ -91,13 +106,12 @@ img
   -webkit-transition: all 0.3s
 
 nav
-  background: $back
-  -webkit-transform: translate3d(0, -6em, 0)
+  // -webkit-transform: translate3d(0, -6em, 0)
   -webkit-transition: all 0.4s // cubic-bezier(0.580, 1.235, 0.615, 1.005)
 
 
-[data-page = home] nav
-  -webkit-transform: translate3d(0, 0, 0)
+//[data-page = home] nav
+//  -webkit-transform: translate3d(0, 0, 0)
 
 [data-page = home]     .desc-home,
 [data-page = events]   .desc-events,
@@ -114,6 +128,8 @@ nav
 [data-page = about]    [href = about]
   // opacity: 0
   -webkit-transition: none
+  i
+    -webkit-transition: none
 
 .scrolled
   &[data-page = home]     [href = ""],
@@ -122,14 +138,18 @@ nav
   &[data-page = news]     [href = news],
   &[data-page = about]    [href = about]
     -webkit-transition: all 0.3s
+    i
+      -webkit-transition: all 0.3s
 
 .scrolled section
   -webkit-transform: translate3d(0,-5em,0)
 
 .scrolled nav
-  border-bottom: 1px solid black
-  height: 330px
-  -webkit-transform: translate3d(0, -6.5em, 0)
+  .wrap
+    // border-bottom: 1px solid $main
+    // background: $back
+  height: 1.5em
+  -webkit-transform: translate3d(0, -0.7em, 0)
   svg
     display: none
   [class *= desc]
@@ -166,7 +186,7 @@ section
 
 h4
   font-size: 50%
-  border-top: 1px solid black
+  border-top: 1px solid $main
   margin-bottom: 1em
   padding-top: 0.5em
 
@@ -237,6 +257,10 @@ p
   fill: none
   stroke: yellow
   stroke-width: 5
+
+.pages li a i
+  -webkit-transition: 0.3s all
+  display: inline-block
 
 @media (max-width: 600px)
   html

@@ -17,10 +17,10 @@
 
   $(window).scroll(function(){
     console.log("scrolled");
-    if ($("body").scrollTop() > 6 && !$("body").hasClass("scrolled")) {
+    if (document.body.scrollTop > 6 && !$("body").hasClass("scrolled")) {
       shrink_nav();
     }
-    else if ($("body").scrollTop() < 6 && $("body").hasClass("scrolled")) {
+    else if (document.body.scrollTop < 6 && $("body").hasClass("scrolled")) {
       grow_nav();
     }
   });
@@ -37,7 +37,6 @@
   }
 
 
-  $("nav li a").on("click", navigate);
 
   function navigate(event) {
     event.preventDefault();
@@ -60,12 +59,14 @@
     // this.style.webkitTransform = build_tform(shift.dx, shift.dy);
 
     var self = this;
-    move(self, thispos, shift);
+    //move(self, shift);
+    move_each_letter(self, shift);
     // move($("nav .active a")[0], {x:0, y:0});
 
     $("nav .active").removeClass("active");
     $(this).parent().addClass("active");
-    $(".pages li a").attr("style", "");
+    // $(".pages li a").attr("style", "");
+    $(".pages li a i").attr("style", "");
 
     history.pushState(stateObj, title, "#/" + href);
     document.title = "Code Studio " + title;
@@ -76,7 +77,7 @@
   function shrink_nav() {
     document.body.classList.add("scrolled");
     stepping = false;
-    $(".pages li a").attr("style", "");
+    $(".pages li a i").attr("style", "");
   }
 
   function grow_nav() {
@@ -88,10 +89,14 @@
 
   // INIT
 
+  $("nav li a").on("click", navigate);
+  $("nav li a").each(function(index,el){
+    wrap_chars_with_tags(el);
+  });
   $("nav li a").first().click();
 
   var stepping;
-  function move(self, thispos, shift) {
+  function move(self, shift) {
     var velocity = {x: 0, y: 20};
     var goal = shift;
     var current = {x: 0, y: 0};
@@ -110,10 +115,10 @@
     var width = $(self).width();
     var height= $(self).height();
 
-    var svg_start_pos = {
-      x: thispos.left + width/2 - navpos.left,
-      y: thispos.top - navpos.top + height + 5
-    };
+    // var svg_start_pos = {
+    //   x: thispos.left + width/2 - navpos.left,
+    //   y: thispos.top - navpos.top + height + 5
+    // };
 
 
     function step() {
@@ -142,19 +147,20 @@
       current.y += velocity.y;
 
       self.style.webkitTransform = build_tform(current.x, current.y);
+      console.log();
 
-      var svg_end_pos = {
-        x: svg_start_pos.x + current.x,
-        y: svg_start_pos.y + current.y - height - 10
-      };
+      // var svg_end_pos = {
+      //   x: svg_start_pos.x + current.x,
+      //   y: svg_start_pos.y + current.y - height - 10
+      // };
 
-      var dat = [svg_start_pos, svg_end_pos];
+      // var dat = [svg_start_pos, svg_end_pos];
 
-      nav_line
-        .datum(dat)
-        .attr("d", function(d) {
-          return line_maker(d);
-        });
+      // nav_line
+      //   .datum(dat)
+      //   .attr("d", function(d) {
+      //     return line_maker(d);
+      //   });
 
 
 
@@ -163,6 +169,7 @@
         && Math.abs(velocity.x) < 0.1
         && Math.abs(velocity.y) < 0.1) {
         stepping = false;
+        self.style.webkitTransform = build_tform(goal.dx, goal.dy);
         return;
       }
       else {
@@ -173,6 +180,33 @@
     window.requestAnimationFrame(step);
   }
 
+  function move_each_letter(node,shift) {
+    move_by_letter(node.children, shift);
+  }
+
+
+  function move_by_letter(arr,shift) {
+    for(var i = 0; i < arr.length; i++) {
+      delayed_letter(arr[i], shift, i * 15);
+    }
+  }
+
+  function delayed_letter(letter, shift, delay) {
+      setTimeout(function(){
+        move(letter,shift);
+      }, delay);
+  }
+
+  function wrap_chars_with_tags(node){
+    var chars = node.textContent.trim().split("");
+    var wrapped = chars.reduce(function(prev, curr, i, arr) {
+      if (curr == " ") curr = "&nbsp;";
+      return prev + "<i>" + curr + "</i>"
+    }, ""); // start with blank string
+    node.innerHTML = wrapped;
+  }
+
+
 
   // Time utility functions
   // ----------------------
@@ -180,7 +214,6 @@
     if (window.performance) return performance.now();
     else return Date.now();
   }
-
 
 
   // Transformation Utility functions
@@ -206,52 +239,3 @@
         (navigator.platform.indexOf("iPod") != -1)
     );
   }
-
-
-
-// Based on http://mikeclaffey.com/google-calendar-into-html/
-// ----------------
-function get_google_events() {
-  var calendar_json_url = "http://www.google.com/calendar/feeds/risd.edu_4stut9jsdgns49dkgdtks7efvc@group.calendar.google.com/public/full?orderby=starttime&sortorder=ascending&max-results=1&futureevents=true&alt=json"
-
-  // Get list of upcoming events formatted in JSON
-  jQuery.getJSON(calendar_json_url, function(data){
-
-    // Parse and render each event
-    jQuery.each(data.feed.entry, function(i, item){
-      if(i == 0) {
-          jQuery("#gcal-events > li").first().hide();
-      };
-      
-      // event title
-      var event_title = item.title.$t;
-      
-      // event contents
-      var event_contents = jQuery.trim(item.content.$t);
-      // make each separate line a new list item
-      // event_contents = event_contents.replace(/\n/g,"</li><li>");
-
-      // event start date/time
-      var event_start_date = moment(item.gd$when[0].startTime);
-      var event_start_str = event_start_date.format("h:mma — dddd, MMMM D");
-      var event_tonow = "(" + event_start_date.fromNow() +")";
-      
-      // event location
-      var event_loc = item.gd$where[0].valueString;
-      
-      // Render the event
-      jQuery("#gcal-events > li").last().before(
-            "<li class='event'>"
-          +   "<h3>" + event_title + "</h3>"
-          +   "<ul class='metadata'>"
-          +     "<li>" + event_start_str + " " + event_tonow + "</li>"
-          +     "<li>" + event_loc + "</li>"
-          +   "</ul>"
-          +   "<p>" + event_contents + "</p>"
-          + "</li>"
-      );
-    });
-  }).error(function(){
-    jQuery("#gcal-events > li").first().html("Couldn't load events :(");
-  });
-}
